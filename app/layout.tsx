@@ -1,0 +1,55 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import ConditionalSidebar from "@/components/ConditionalSidebar";
+import Navbar from "@/components/Navbar";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AuthProvider } from "@/hooks/use-auth";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { cookies } from "next/headers";
+
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Expert Dashboard",
+  description: "Professional Dashboard with Authentication",
+  icons: {
+    icon: "/logo.svg",
+    apple: "/logo.svg",
+  },
+};
+
+export default async function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar_state")?.value === "true";
+
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} antialiased flex`}>
+        <AuthProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <SidebarProvider defaultOpen={defaultOpen}>
+              <ConditionalSidebar />
+              <main className="w-full">
+                <Navbar />
+                <div className="px-4">{children}</div>
+              </main>
+            </SidebarProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  );
+}
